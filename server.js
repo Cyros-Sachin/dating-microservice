@@ -10,7 +10,7 @@ import paymentMethodRoutes from './routes/paymentMethodRoutes.js';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5002;
+const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
 
 app.use(cors());
