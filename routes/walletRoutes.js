@@ -6,7 +6,8 @@ const router = express.Router();
 // Add money to wallet
 router.post('/wallet/topup', async (req, res) => {
   try {
-    const { userId, amount, method } = req.body;
+    const userId = req.headers['x-user-id']; // get userId from header
+    const { amount, method } = req.body;
 
     if (!userId || !amount || !method) {
       return res.status(400).json({ error: "Missing required fields." });
@@ -34,6 +35,7 @@ router.post('/wallet/topup', async (req, res) => {
   }
 });
 
+
 // Get wallet info
 // GET /api/wallet/:userId
 router.get('/wallet/:userId', async (req, res) => {
@@ -59,7 +61,9 @@ router.get('/wallet/:userId', async (req, res) => {
 
 router.post('/wallet/deduct', async (req, res) => {
   try {
-    const { userId, amount, purpose } = req.body;
+    const userId = req.headers['x-user-id'];
+    const { amount, purpose } = req.body;
+    console.log("Recieved");
 
     if (!userId || !amount) {
       return res.status(400).json({ error: "Missing required fields." });
@@ -82,18 +86,20 @@ router.post('/wallet/deduct', async (req, res) => {
         $push: {
           transactions: {
             title: purpose || "Service Deduction",
-            amount: -amount, // Negative to indicate deduction
+            amount: -amount,
             date: new Date()
           }
         }
       },
       { new: true }
     );
+
     res.json({ success: true, wallet: updatedWallet });
   } catch (err) {
     console.error("Deduction failed:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 export default router;

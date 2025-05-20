@@ -2,7 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import jwt from 'jsonwebtoken';
+// import jwt from 'jsonwebtoken';
 import DatingProfile from './models/DatingProfile.js';
 import walletRoutes from './routes/walletRoutes.js'; // Adjust path if needed
 import paymentMethodRoutes from './routes/paymentMethodRoutes.js';
@@ -11,7 +11,7 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
+// const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
 
 app.use(cors());
 app.use(express.json());
@@ -25,24 +25,23 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/datingApp',
 
 
 // Check if profile exists
+// Check if profile exists
 app.get('/api/check-profile', async (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'No token provided' });
+    // console.log("Recived!!");
+    const user_id = req.headers['x-user-id']; // ✅ Proper way to get user_id
+    if (!user_id) {
+      return res.status(400).json({ message: 'Missing user_id in headers' });
     }
 
-    const user_id = authHeader.split(' ')[1]; // 👈 Extract user_id from header
-    // console.log(user_id);
     const profile = await DatingProfile.findOne({ user_id });
-
     res.json({ exists: !!profile });
   } catch (error) {
     console.error('Check profile error:', error);
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 
 // Create dating profile
@@ -88,21 +87,11 @@ app.get('/api/dating-profile/:user_id', async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-app.get('/api/dating-profile/:user_id', async (req, res) => {
-  // console.log(req.params.user_id);
-  try {
-    const profile = await (DatingProfile.findOne({ user_id: req.params.user_id }));
-    if (!profile) return res.status(404).json({ message: "Profile not found" });
-    res.json(profile);
-    // console.log(profile);
 
-  } catch (error) {
-    res.status(500).json({ message: "Server error" });
-  }
-});
 app.get('/api/find-dating-profile/:_id', async (req, res) => {
   // console.log(req.params.user_id);
   try {
+    console.log(req.params._id);
     const profile = await (DatingProfile.findOne({_id: req.params._id }));
     if (!profile) return res.status(404).json({ message: "Profile not found" });
     res.json(profile);
